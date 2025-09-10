@@ -4,6 +4,9 @@
 * Table of Contents :toc:
 - [[#introduction][Introduction]]
 - [[#user-setup][User Setup]]
+- [[#frame-setup][Frame Setup]]
+  - [[#initial-frame-size][Initial frame size]]
+  - [[#initial-frame-position][Initial Frame Position]]
 - [[#fonts][Fonts]]
 - [[#theme][Theme]]
 - [[#dashboard][Dashboard]]
@@ -19,6 +22,20 @@ Some functionality uses this to identify you, e.g. GPG configuration, email clie
 #+BEGIN_SRC emacs-lisp
 ;; (setq user-full-name "John Doe"
 ;;       user-mail-address "john@doe.com")
+#+END_SRC
+
+* Frame Setup
+** Initial frame size
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'default-frame-alist '(height . 70))
+(add-to-list 'default-frame-alist '(width . 240))
+#+END_SRC
+
+** Initial Frame Position
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'default-frame-alist '(user-position . t))
+(add-to-list 'default-frame-alist '(top . 0.5))
+(add-to-list 'default-frame-alist '(left . 0.5))
 #+END_SRC
 
 * Fonts
