@@ -77,4 +77,4 @@
 ;; they are implemented.
 
 ;; Dashboard setup
-(setq +doom-dashboard-banner-file "~/.doom.d/wallpaper.png")
+(setq +doom-dashboard-banner-file (concat doom-user-dir "wallpaper.png"))
