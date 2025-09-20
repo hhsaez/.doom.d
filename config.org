@@ -4,6 +4,7 @@
 * Table of Contents :toc:
 - [[#introduction][Introduction]]
 - [[#user-setup][User Setup]]
+- [[#editor][Editor]]
 - [[#frame-setup][Frame Setup]]
   - [[#initial-frame-size][Initial frame size]]
   - [[#initial-frame-position][Initial Frame Position]]
@@ -22,6 +23,18 @@ Some functionality uses this to identify you, e.g. GPG configuration, email clie
 #+BEGIN_SRC emacs-lisp
 ;; (setq user-full-name "John Doe"
 ;;       user-mail-address "john@doe.com")
+#+END_SRC
+
+* Editor
+
+Disable empty line markers
+
+#+BEGIN_SRC emacs-lisp
+(setq-default indicate-empty-lines nil)
+
+(after! vi-tilde-fringe
+  (global-vi-tilde-fringe-mode -1))
+(remove-hook 'prog-mode-hook #'vi-tilde-fringe-mode)
 #+END_SRC
 
 * Frame Setup
