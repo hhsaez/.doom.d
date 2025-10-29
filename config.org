@@ -12,6 +12,7 @@
 - [[#theme][Theme]]
 - [[#dashboard][Dashboard]]
 - [[#misc][Misc]]
+- [[#development][Development]]
 
 * Introduction
 Place your private configuration here! Remember, you do not need to run 'doom sync' after modifying this file!
@@ -131,4 +132,45 @@ available. You can either set `doom-theme' or manually load a theme with the
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
+#+END_SRC
+
+* Development
+
+The following allos code blocks within .org files to be formatted when using /C-c '/
+
+#+BEGIN_SRC emacs-lisp
+
+;; Good Org src defaults (indent inside blocks with c++-mode rules)
+(after! org
+  (setq org-src-tab-acts-natively t
+        org-src-preserve-indentation nil
+        org-edit-src-content-indentation 0))
+
+;; Make org-src C++ edit buffers format like .cpp, without clang-format
+(after! org-src
+  (defun my/org-src-cpp-lsp-format-setup ()
+    (when (and (bound-and-true-p org-src-mode)
+               (derived-mode-p 'c++-mode))
+      ;; give buffer a plausible filename/dir so clangd attaches (you already did this)
+      (unless buffer-file-name
+        (setq-local buffer-file-name
+                    (expand-file-name "org-src-edit.cpp" default-directory)))
+
+      ;; ensure LSP is running
+      (when (fboundp 'lsp-deferred) (lsp-deferred))
+
+      ;; 1) Format on save (optional)
+      (add-hook 'before-save-hook #'lsp-format-buffer nil t)
+
+      ;; 2) Use TAB to format (instead of cc-mode indent) in the edit buffer
+      (local-set-key (kbd "TAB") #'lsp-format-buffer)
+
+      ;; If you still want cc-mode indent on Shift+TAB:
+      (local-set-key (kbd "<backtab>") #'indent-for-tab-command)
+
+      ;; If you want to try on-type formatting anyway:
+      ;; (setq-local lsp-enable-on-type-formatting t)
+      ;; Note: may be limited or interfered by electric-indent-mode.
+      ))
+  (add-hook 'org-src-mode-hook #'my/org-src-cpp-lsp-format-setup))
 #+END_SRC
