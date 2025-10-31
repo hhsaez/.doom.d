@@ -38,6 +38,16 @@ Disable empty line markers
 (remove-hook 'prog-mode-hook #'vi-tilde-fringe-mode)
 #+END_SRC
 
+Use the Command key as Meta on macOS while leaving Option for accented characters.
+
+#+BEGIN_SRC emacs-lisp
+(when (eq system-type 'darwin)
+  (setq mac-command-modifier 'meta
+        mac-option-modifier 'none
+        ns-command-modifier 'meta
+        ns-option-modifier 'none))
+#+END_SRC
+
 * Frame Setup
 ** Initial frame size
 #+BEGIN_SRC emacs-lisp
