@@ -13,6 +13,7 @@
 - [[#dashboard][Dashboard]]
 - [[#misc][Misc]]
 - [[#development][Development]]
+  - [[#compilation][Compilation]]
 
 * Introduction
 Place your private configuration here! Remember, you do not need to run 'doom sync' after modifying this file!
@@ -183,4 +184,12 @@ The following allos code blocks within .org files to be formatted when using /C-
       ;; Note: may be limited or interfered by electric-indent-mode.
       ))
   (add-hook 'org-src-mode-hook #'my/org-src-cpp-lsp-format-setup))
+#+END_SRC
+
+** Compilation
+Keep compilation buffers (including projectile builds) scrolled to the newest output.
+
+#+BEGIN_SRC emacs-lisp
+(after! compile
+  (setq compilation-scroll-output t))
 #+END_SRC
