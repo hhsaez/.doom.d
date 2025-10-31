@@ -191,5 +191,20 @@ Keep compilation buffers (including projectile builds) scrolled to the newest ou
 
 #+BEGIN_SRC emacs-lisp
 (after! compile
-  (setq compilation-scroll-output t))
+  (setq compilation-scroll-output t)
+
+  (defun my/next-error-prioritize-errors (orig-fn &rest args)
+    "Prefer diagnostics with severity ≥ error when cycling with `next-error'."
+    (let ((orig-threshold compilation-skip-threshold))
+      (condition-case _err
+          (let ((compilation-skip-threshold (max 2 (or compilation-skip-threshold 0)))
+                (inhibit-message t)
+                (ring-bell-function #'ignore))
+            (apply orig-fn args))
+        (user-error
+         (let ((compilation-skip-threshold orig-threshold))
+           (apply orig-fn args))))))
+
+  (unless (advice-member-p #'my/next-error-prioritize-errors 'next-error)
+    (advice-add 'next-error :around #'my/next-error-prioritize-errors)))
 #+END_SRC
