@@ -14,6 +14,7 @@
 - [[#misc][Misc]]
 - [[#development][Development]]
   - [[#compilation][Compilation]]
+  - [[#projectile][Projectile]]
 
 * Introduction
 Place your private configuration here! Remember, you do not need to run 'doom sync' after modifying this file!
@@ -207,4 +208,35 @@ Keep compilation buffers (including projectile builds) scrolled to the newest ou
 
   (unless (advice-member-p #'my/next-error-prioritize-errors 'next-error)
     (advice-add 'next-error :around #'my/next-error-prioritize-errors)))
+#+END_SRC
+
+** Projectile
+Treat git submodules as part of the parent project instead of switching roots. The helper below asks git for the superproject directory; if we are inside a submodule it returns the top-level checkout so projectile keeps that as the active project. When no superproject exists the fallback still lets projectile use its usual detection.
+
+#+BEGIN_SRC emacs-lisp
+(after! projectile
+  (require 'subr-x)
+  (defun my/projectile-root-superproject (dir)
+    "Return the superproject root for DIR when inside a git submodule."
+    (when dir
+      (let ((default-directory dir))
+        (let* ((raw (when (executable-find "git")
+                      (ignore-errors
+                        (car (process-lines "git" "rev-parse" "--show-superproject-working-tree")))))
+               (raw (and raw (string-trim raw)))
+               (candidate (cond
+                           ((and raw (not (string-empty-p raw)))
+                            (if (file-name-absolute-p raw)
+                                raw
+                              (expand-file-name raw)))
+                           (t (locate-dominating-file dir ".gitmodules"))))
+               (resolved (and candidate
+                              (file-name-as-directory (expand-file-name candidate)))))
+          (when (and resolved (not (string-suffix-p "/" resolved)))
+            (setq resolved (concat resolved "/")))
+          (when (and resolved
+                     (not (string-equal (directory-file-name resolved)
+                                        (directory-file-name (expand-file-name dir)))))
+            resolved)))))
+  (add-to-list 'projectile-project-root-functions #'my/projectile-root-superproject))
 #+END_SRC
