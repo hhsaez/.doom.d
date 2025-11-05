@@ -5,6 +5,7 @@
 - [[#introduction][Introduction]]
 - [[#user-setup][User Setup]]
 - [[#editor][Editor]]
+- [[#os-specific][OS Specific]]
 - [[#frame-setup][Frame Setup]]
   - [[#initial-frame-size][Initial frame size]]
   - [[#initial-frame-position][Initial Frame Position]]
@@ -48,6 +49,35 @@ Use the Command key as Meta on macOS while leaving Option for accented character
         mac-option-modifier 'none
         ns-command-modifier 'meta
         ns-option-modifier 'none))
+#+END_SRC
+
+Revert buffers when the underlying file has changed.
+
+#+BEGIN_SRC emacs-lisp
+(global-auto-revert-mode 1)
+#+END_SRC
+
+By default Emacs will close all windows when pressing the ESC key. I hate that.
+
+Instead, map the ESC key to keyboard-escape-quit (C-g) instead
+
+#+BEGIN_SRC emacs-lisp
+(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+#+END_SRC
+
+In addition, this seems to make the minibuffer to exit with just one ESC key press (instead of ESC ESC ESC by default)
+
+* OS Specific
+
+Restore the default macOS font zoom shortcuts now that Command behaves as Meta.
+
+#+BEGIN_SRC emacs-lisp
+(when (eq system-type 'darwin)
+  (map! "M-=" #'doom/increase-font-size
+        "M-+" #'doom/increase-font-size
+        "M--" #'doom/decrease-font-size
+        "M-_" #'doom/decrease-font-size
+        "M-0" #'doom/reset-font-size))
 #+END_SRC
 
 * Frame Setup
