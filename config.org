@@ -16,6 +16,7 @@
 - [[#development][Development]]
   - [[#compilation][Compilation]]
   - [[#projectile][Projectile]]
+  - [[#treemacs][Treemacs]]
 - [[#gpt-el][GPT-EL]]
 
 * Introduction
@@ -110,7 +111,8 @@ See 'C-h v doom-font' for documentation and more examples of what they accept. F
 #+BEGIN_SRC emacs-lisp
 ;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
 ;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
-(setq doom-font (font-spec :family "JetBrains Mono" :size 16))
+(setq doom-font (font-spec :family "JetBrains Mono" :size 16)
+      doom-symbol-font (font-spec :family "Noto Sans Symbols" :size 16))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -272,6 +274,13 @@ Treat git submodules as part of the parent project instead of switching roots. T
   (add-to-list 'projectile-project-root-functions #'my/projectile-root-superproject))
 #+END_SRC
 
+** Treemacs
+
+#+BEGIN_SRC emacs-lisp
+(after! treemacs
+  (setq treemacs-is-never-other-window nil))
+#+END_SRC
+
 * GPT-EL
 
 #+BEGIN_SRC emacs-lisp
@@ -281,3 +290,4 @@ Treat git submodules as part of the parent project instead of switching roots. T
         (gptel-make-gh-copilot "copilot-chat")
         gptel-model 'gpt-4o))
 #+END_SRC
+
