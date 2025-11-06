@@ -16,6 +16,7 @@
 - [[#development][Development]]
   - [[#compilation][Compilation]]
   - [[#projectile][Projectile]]
+- [[#gpt-el][GPT-EL]]
 
 * Introduction
 Place your private configuration here! Remember, you do not need to run 'doom sync' after modifying this file!
@@ -269,4 +270,14 @@ Treat git submodules as part of the parent project instead of switching roots. T
                                         (directory-file-name (expand-file-name dir)))))
             resolved)))))
   (add-to-list 'projectile-project-root-functions #'my/projectile-root-superproject))
+#+END_SRC
+
+* GPT-EL
+
+#+BEGIN_SRC emacs-lisp
+(after! gptel
+  (require 'gptel-gh)
+  (setq gptel-backend
+        (gptel-make-gh-copilot "copilot-chat")
+        gptel-model 'gpt-4o))
 #+END_SRC
