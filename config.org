@@ -6,9 +6,9 @@
 - [[#user-setup][User Setup]]
 - [[#editor][Editor]]
 - [[#os-specific][OS Specific]]
+  - [[#mac-os-x][Mac OS X]]
+  - [[#window-wsl][Window WSL]]
 - [[#frame-setup][Frame Setup]]
-  - [[#initial-frame-size][Initial frame size]]
-  - [[#initial-frame-position][Initial Frame Position]]
 - [[#fonts][Fonts]]
 - [[#theme][Theme]]
 - [[#dashboard][Dashboard]]
@@ -71,6 +71,8 @@ In addition, this seems to make the minibuffer to exit with just one ESC key pre
 
 * OS Specific
 
+** Mac OS X
+
 Restore the default macOS font zoom shortcuts now that Command behaves as Meta.
 
 #+BEGIN_SRC emacs-lisp
@@ -82,18 +84,56 @@ Restore the default macOS font zoom shortcuts now that Command behaves as Meta.
         "M-0" #'doom/reset-font-size))
 #+END_SRC
 
-* Frame Setup
-** Initial frame size
+** Window WSL
+
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'default-frame-alist '(height . 70))
-(add-to-list 'default-frame-alist '(width . 240))
+(defun hhsaez/wsl-p ()
+  (and (eq system-type 'gnu/linux)
+       (or (getenv "WSL_INTEROP")
+           (file-exists-p "/proc/sys/fs/binfmt_misc/WSLInterop"))))
+
+(defun hhsaez/apply-borderless-frame ()
+  (when (hhsaez/wsl-p)
+    (dolist (param '((undecorated . t)
+                     (drag-internal-border . 10)
+                     (internal-border-width . 10)
+                     (alpha-background . 100)))
+      (setf (alist-get (car param) default-frame-alist) (cdr param))
+      (add-to-list 'initial-frame-alist param))))
+
+(add-hook 'after-init-hook #'hhsaez/apply-borderless-frame)
+
+ (defun hhsaez/toggle-undecorated-frame ()
+    "Toggle window-manager decorations on the current frame."
+    (interactive)
+    (let* ((frame (selected-frame))
+           (current (frame-parameter frame 'undecorated)))
+      (set-frame-parameter frame 'undecorated (not current))))
 #+END_SRC
 
-** Initial Frame Position
+* Frame Setup
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'default-frame-alist '(user-position . t))
-(add-to-list 'default-frame-alist '(top . 0.5))
-(add-to-list 'default-frame-alist '(left . 0.5))
+(setq frame-resize-pixelwise t
+      window-resize-pixelwise t)
+
+(defun hhsaez/scale-and-center-frame (&optional frame)
+  "Resize FRAME to 80%x90% of its monitor and center it. Works for new frames too."
+  (let* ((frame (or frame (selected-frame))))
+    (when (and (display-graphic-p frame)
+               (fboundp 'frame-monitor-attributes))
+      (let* ((attrs (frame-monitor-attributes frame))
+             (workarea (alist-get 'workarea attrs)))
+        (when (and workarea (>= (length workarea) 4))
+          (pcase-let* ((`(,wx ,wy ,ww ,wh) workarea)
+                       (frame-width (floor (* ww 0.8)))
+                       (frame-height (floor (* wh 0.9)))
+                       (left (+ wx (/ (- ww frame-width) 2)))
+                       (top (+ wy (/ (- wh frame-height) 2))))
+            (set-frame-size frame frame-width frame-height t)
+            (set-frame-position frame (round left) (round top))))))))
+
+(add-hook 'after-init-hook #'hhsaez/scale-and-center-frame t)
+(add-hook 'after-make-frame-functions #'hhsaez/scale-and-center-frame)
 #+END_SRC
 
 * Fonts
@@ -109,7 +149,7 @@ Doom exposes five (optional) variables for controlling fonts in Doom:
 See 'C-h v doom-font' for documentation and more examples of what they accept. For example:
 
 #+BEGIN_SRC emacs-lisp
-;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
+;;n(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
 ;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
 (setq doom-font (font-spec :family "JetBrains Mono" :size 16)
       doom-symbol-font (font-spec :family "Noto Sans Symbols" :size 16))
@@ -290,4 +330,3 @@ Treat git submodules as part of the parent project instead of switching roots. T
         (gptel-make-gh-copilot "copilot-chat")
         gptel-model 'gpt-4o))
 #+END_SRC
-
