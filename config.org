@@ -321,6 +321,41 @@ Treat git submodules as part of the parent project instead of switching roots. T
   (setq treemacs-is-never-other-window nil))
 #+END_SRC
 
+** Tree-sitter grammars
+Install missing C/C++ grammars automatically so tree-sitter works on fresh setups.
+
+#+BEGIN_SRC emacs-lisp
+(after! treesit
+  (require 'cl-lib)
+  (defvar hhsaez/treesit-auto-grammars '(c cpp)
+    "Tree-sitter grammars that must be present locally.")
+
+  (defvar hhsaez/treesit-language-sources
+    '((c . ("https://github.com/tree-sitter/tree-sitter-c"))
+      (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp")))
+    "Alist of LANG . SOURCE tuples to ensure before installing grammars.")
+
+  ;; Guarantee treesit knows how to fetch our required grammars.
+  (dolist (entry hhsaez/treesit-language-sources)
+    (cl-pushnew entry treesit-language-source-alist
+                :test (lambda (a b) (eq (car a) (car b)))))
+
+  (defun hhsaez/ensure-treesit-grammars (&optional languages)
+    "Install any missing tree-sitter LANGUAGES without prompting."
+    (when (and (fboundp 'treesit-install-language-grammar)
+               (fboundp 'treesit-language-available-p))
+      (dolist (lang (or languages hhsaez/treesit-auto-grammars))
+        (unless (treesit-language-available-p lang)
+          (condition-case err
+              (progn
+                (message "Installing tree-sitter grammar for %s..." lang)
+                (treesit-install-language-grammar lang))
+            (error
+             (message "tree-sitter grammar install failed for %s: %s" lang err)))))))
+
+  (hhsaez/ensure-treesit-grammars))
+#+END_SRC
+
 * GPT-EL
 
 #+BEGIN_SRC emacs-lisp
