@@ -17,6 +17,7 @@
   - [[#compilation][Compilation]]
   - [[#projectile][Projectile]]
   - [[#treemacs][Treemacs]]
+  - [[#tree-sitter-grammars][Tree-sitter grammars]]
 - [[#gpt-el][GPT-EL]]
 
 * Introduction
