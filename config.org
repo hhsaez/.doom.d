@@ -375,6 +375,29 @@ Treat git submodules as part of the parent project instead of switching roots. T
   (add-to-list 'projectile-project-root-functions #'my/projectile-root-superproject))
 #+END_SRC
 
+** Codex CLI
+Run the Codex CLI from the current Projectile project without leaving Emacs.
+
+#+BEGIN_SRC emacs-lisp
+(after! projectile
+  (defun hhsaez/codex-run ()
+    "Launch the Codex CLI in a real terminal at the Projectile project root."
+    (interactive)
+    (let ((root (projectile-project-root)))
+      (unless root
+        (user-error "Not inside a Projectile project"))
+      (let* ((default-directory root)
+             (codex (or (executable-find "codex")
+                        (user-error "Codex executable not found in PATH")))
+             (buffer-name (generate-new-buffer-name "*Codex*")))
+        (require 'term)
+        (let ((term-buffer (make-term buffer-name codex)))
+          (with-current-buffer term-buffer
+            (term-mode)
+            (term-char-mode))
+          (pop-to-buffer term-buffer))))))
+#+END_SRC
+
 ** CMake
 Ensure the cmake language server can be installed even when the Python package manager is only exposed as =pip3= or via =python -m pip=.
 

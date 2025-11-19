@@ -37,6 +37,7 @@ winget install GNU.Emacs ripgrep.ripgrep sharkdp.fd Git.Git GitHub.cli
 ## Optional integrations
 - **GitHub Copilot chat via gptel**: install GitHub CLI (`gh`), authenticate with `gh auth login --scopes \"copilot\"`, and ensure `gh` is on your `PATH`. Set `GITHUB_TOKEN` or rely on the CLI auth cache before launching Emacs.
 - **Org directory**: the config expects `~/org/`. Create it or adjust the path in `config.org`.
+- **Codex CLI**: install the `codex` binary and run `M-x hhsaez/codex-run` from any Projectile project to open an interactive Codex session in a proper terminal buffer (falls back to Emacs `term`, so it works even without vterm).
 
 ## Post-install steps
 
