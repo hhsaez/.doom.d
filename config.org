@@ -375,6 +375,71 @@ Treat git submodules as part of the parent project instead of switching roots. T
   (add-to-list 'projectile-project-root-functions #'my/projectile-root-superproject))
 #+END_SRC
 
+** CMake
+Ensure the cmake language server can be installed even when the Python package manager is only exposed as =pip3= or via =python -m pip=.
+
+#+BEGIN_SRC emacs-lisp
+(after! lsp-cmake
+  (require 'subr-x)
+  (require 'cl-lib)
+
+  (defvar hhsaez/lsp-cmake-pip-packages
+    '("pygls<2" "cmake-language-server==0.1.11")
+    "Package specs installed whenever cmakels is bootstrapped.")
+
+  (defun hhsaez/lsp-cmake--python-user-base ()
+    (when-let ((python (or (executable-find "python3")
+                           (executable-find "python"))))
+      (ignore-errors
+        (string-trim
+         (car (process-lines python "-m" "site" "--user-base"))))))
+
+  (defun hhsaez/lsp-cmake--user-bin-paths ()
+    (let* ((home (or (getenv "HOME") default-directory))
+           (base (hhsaez/lsp-cmake--python-user-base))
+           (paths (delq nil
+                        (list (when base (expand-file-name "bin" base))
+                              (expand-file-name ".local/bin" home)))))
+      (append (file-expand-wildcards (expand-file-name "Library/Python/*/bin" home))
+              paths)))
+
+  (defun hhsaez/lsp-cmake-ensure-user-path ()
+    (dolist (bin (cl-remove-duplicates (hhsaez/lsp-cmake--user-bin-paths) :test #'string-equal))
+      (when (file-directory-p bin)
+        (unless (member bin exec-path)
+          (push bin exec-path))
+        (let ((path (getenv "PATH")))
+          (unless (and path (string-match (regexp-quote bin) path))
+            (setenv "PATH" (if path (concat bin path-separator path) bin)))))))
+
+  (hhsaez/lsp-cmake-ensure-user-path)
+
+  (defun hhsaez/lsp-cmake--pip-command ()
+    (cond ((executable-find "pip3") '("pip3"))
+          ((executable-find "pip") '("pip"))
+          ((executable-find "python3") '("python3" "-m" "pip"))
+          ((executable-find "python") '("python" "-m" "pip"))))
+
+  (defun hhsaez/lsp-cmake-download-server (_client callback error-callback update?)
+    (let ((cmd (hhsaez/lsp-cmake--pip-command)))
+      (if cmd
+          (let* ((program (car cmd))
+                 (args (cdr cmd))
+                 (process-environment (cons "PIP_BREAK_SYSTEM_PACKAGES=1" process-environment)))
+            (apply #'lsp-async-start-process
+                   callback
+                   error-callback
+                   program
+                   (append args
+                           (list "install" "--user")
+                           (when update? '("-U"))
+                           hhsaez/lsp-cmake-pip-packages)))
+        (funcall error-callback
+                 "No pip executable found. Install Python's pip so cmake-language-server can be fetched."))))
+
+  (advice-add 'lsp-cmake--download-server :override #'hhsaez/lsp-cmake-download-server))
+#+END_SRC
+
 ** Treemacs
 
 #+BEGIN_SRC emacs-lisp
