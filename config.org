@@ -230,7 +230,20 @@ The following allos code blocks within .org files to be formatted when using /C-
 (after! org
   (setq org-src-tab-acts-natively t
         org-src-preserve-indentation nil
-        org-edit-src-content-indentation 0))
+        org-edit-src-content-indentation 0)
+
+  (setq org-src-window-setup 'other-window)
+
+  (defun hhsaez/org-src-display-buffer (buffer alist)
+    (if (>= (window-total-width) 160)
+        (display-buffer-in-direction
+         buffer
+         (append alist '((direction . right)
+                         (window-width . 0.5))))
+      (display-buffer-at-bottom buffer alist)))
+
+  (add-to-list 'display-buffer-alist
+               '("^\\*Org Src" hhsaez/org-src-display-buffer)))
 
 ;; Make org-src C++ edit buffers format like .cpp, without clang-format
 (after! org-src
