@@ -13,6 +13,7 @@
 - [[#theme][Theme]]
 - [[#dashboard][Dashboard]]
 - [[#misc][Misc]]
+- [[#markdown-editing][Markdown Editing]]
 - [[#development][Development]]
   - [[#compilation][Compilation]]
   - [[#projectile][Projectile]]
@@ -65,7 +66,9 @@ By default Emacs will close all windows when pressing the ESC key. I hate that.
 Instead, map the ESC key to keyboard-escape-quit (C-g) instead
 
 #+BEGIN_SRC emacs-lisp
-(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+(when (display-graphic-p)
+  ;; In TTY, ESC is the Meta prefix; keep it unmodified there.
+  (define-key key-translation-map (kbd "ESC") (kbd "C-g")))
 #+END_SRC
 
 In addition, this seems to make the minibuffer to exit with just one ESC key press (instead of ESC ESC ESC by default)
@@ -218,6 +221,58 @@ available. You can either set `doom-theme' or manually load a theme with the
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
+#+END_SRC
+
+* Markdown Editing
+Make markdown buffers read more like Org by hiding markup and using variable
+pitch while keeping code in fixed pitch.
+
+#+BEGIN_SRC emacs-lisp
+(after! markdown-mode
+  (setq markdown-fontify-code-blocks-natively t
+        markdown-header-scaling t
+        markdown-fontify-whole-heading-line t
+        markdown-header-scaling-values '(1.7 1.4 1.25 1.12 1.06 1.0)
+        markdown-hide-urls t)
+
+  (defun hhsaez/markdown-setup ()
+    "Make markdown buffers read like prose with hidden markup."
+    (setq-local markdown-hide-markup t)
+    (setq-local visual-fill-column-width 92
+                visual-fill-column-center-text t
+                line-spacing 0.12)
+    (display-line-numbers-mode -1)
+    (visual-line-mode 1)
+    (mixed-pitch-mode 1)
+    (visual-fill-column-mode 1)
+    (markdown-toggle-markup-hiding 1))
+
+  (add-hook 'markdown-mode-hook #'hhsaez/markdown-setup)
+  (add-hook 'gfm-mode-hook #'hhsaez/markdown-setup)
+
+  (set-face-attribute 'markdown-code-face nil :inherit 'fixed-pitch)
+  (set-face-attribute 'markdown-inline-code-face nil :inherit 'fixed-pitch)
+  (set-face-attribute 'markdown-pre-face nil :inherit 'fixed-pitch)
+  (set-face-attribute 'markdown-table-face nil :inherit 'fixed-pitch)
+
+  (custom-set-faces!
+    `(markdown-header-face-1 :weight bold :height 1.7 :foreground ,(doom-color 'orange))
+    `(markdown-header-face-2 :weight bold :height 1.4 :foreground ,(doom-color 'yellow))
+    `(markdown-header-face-3 :weight semi-bold :height 1.25 :foreground ,(doom-color 'green))
+    `(markdown-header-face-4 :weight semi-bold :height 1.12 :foreground ,(doom-color 'blue))
+    `(markdown-header-face-5 :weight semi-bold :height 1.06 :foreground ,(doom-color 'violet))
+    `(markdown-header-face-6 :weight semi-bold :height 1.0 :foreground ,(doom-color 'cyan))
+    `(markdown-pre-face :background "#1f2430" :extend t)
+    `(markdown-code-face :background "#2a2f3a")
+    `(markdown-inline-code-face :background "#2a2f3a" :box (:line-width 1 :color "#3a3f4b"))
+    `(markdown-markup-face :inherit 'fixed-pitch :foreground ,(doom-color 'base5))
+    `(markdown-language-keyword-face :inherit 'fixed-pitch :foreground ,(doom-color 'teal))
+    `(markdown-blockquote-face :slant italic :foreground ,(doom-color 'base6)))
+
+  (map! :map markdown-mode-map
+        :localleader
+        :desc "Toggle markup"
+        "h" #'markdown-toggle-markup-hiding))
 #+END_SRC
 
 * Development
