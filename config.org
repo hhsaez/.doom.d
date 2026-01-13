@@ -70,6 +70,13 @@ Instead, map the ESC key to keyboard-escape-quit (C-g) instead
 
 In addition, this seems to make the minibuffer to exit with just one ESC key press (instead of ESC ESC ESC by default)
 
+Skip the confirmation prompt when quitting with =C-x C-c= unless processes are still running (keep that warning).
+
+#+BEGIN_SRC emacs-lisp
+(setq confirm-kill-emacs nil
+      confirm-kill-processes t)
+#+END_SRC
+
 * OS Specific
 
 ** Mac OS X
