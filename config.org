@@ -342,11 +342,27 @@ Ensure regular C++ buffers behave the same way: run clangd on save and when pres
 #+END_SRC
 
 ** Compilation
-Keep compilation buffers (including projectile builds) scrolled to the newest output.
+Keep compilation buffers (including projectile builds) scrolled to the newest output, and place them based on the frame shape (left on widescreen, bottom otherwise).
 
 #+BEGIN_SRC emacs-lisp
 (after! compile
   (setq compilation-scroll-output t)
+
+  (defun hhsaez/update-compilation-popup-rule (&optional frame)
+    "Place the compilation window on the left for wide frames, otherwise at the bottom.
+Size is 25% of the frame in either orientation. A frame is considered wide when
+its width is at least 1.5× its height."
+    (with-selected-frame (or frame (selected-frame))
+      (let ((side (if (> (frame-pixel-width) (* 1.5 (frame-pixel-height)))
+                      'left
+                    'bottom)))
+        (set-popup-rule! "^\\*compilation\\*"
+          :side side
+          :size 0.25))))
+
+  ;; Keep the rule up to date as the frame size changes and on startup.
+  (add-hook 'window-size-change-functions #'hhsaez/update-compilation-popup-rule)
+  (hhsaez/update-compilation-popup-rule)
 
   (defun my/next-error-prioritize-errors (orig-fn &rest args)
     "Prefer diagnostics with severity ≥ error when cycling with `next-error'."
