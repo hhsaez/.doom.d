@@ -38,6 +38,7 @@ winget install GNU.Emacs ripgrep.ripgrep sharkdp.fd Git.Git GitHub.cli
 - **GitHub Copilot chat via gptel**: install GitHub CLI (`gh`), authenticate with `gh auth login --scopes \"copilot\"`, and ensure `gh` is on your `PATH`. Set `GITHUB_TOKEN` or rely on the CLI auth cache before launching Emacs.
 - **Org directory**: the config expects `~/org/`. Create it or adjust the path in `config.org`.
 - **Codex CLI**: install the `codex` binary and run `M-x hhsaez/codex-run` from any Projectile project to open an interactive Codex session in a proper terminal buffer (falls back to Emacs `term`, so it works even without vterm).
+- **Terminal Emacs on macOS**: configure your terminal to send Option/Alt as Meta (Terminal.app: Settings ▸ Profiles ▸ Keyboard ▸ “Use Option as Meta key”; iTerm2: Profiles ▸ Keys ▸ Left/Right Option Key = Esc+). Super is not available in `-nw` sessions; use Command as Meta in GUI sessions instead.
 
 ## Post-install steps
 
