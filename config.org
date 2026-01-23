@@ -342,27 +342,36 @@ Ensure regular C++ buffers behave the same way: run clangd on save and when pres
 #+END_SRC
 
 ** Compilation
-Keep compilation buffers (including projectile builds) scrolled to the newest output, and place them based on the frame shape (left on widescreen, bottom otherwise).
+Keep compilation buffers (including projectile builds) scrolled to the newest output. Show them at the bottom by default, with a toggle to move them to the left when needed.
 
 #+BEGIN_SRC emacs-lisp
 (after! compile
   (setq compilation-scroll-output t)
 
-  (defun hhsaez/update-compilation-popup-rule (&optional frame)
-    "Place the compilation window on the left for wide frames, otherwise at the bottom.
-Size is 25% of the frame in either orientation. A frame is considered wide when
-its width is at least 1.5× its height."
-    (with-selected-frame (or frame (selected-frame))
-      (let ((side (if (> (frame-pixel-width) (* 1.5 (frame-pixel-height)))
-                      'left
-                    'bottom)))
-        (set-popup-rule! "^\\*compilation\\*"
-          :side side
-          :size 0.25))))
+  (defvar hhsaez/compilation-popup-side 'bottom
+    "Preferred side for displaying compilation popups.")
 
-  ;; Keep the rule up to date as the frame size changes and on startup.
-  (add-hook 'window-size-change-functions #'hhsaez/update-compilation-popup-rule)
-  (hhsaez/update-compilation-popup-rule)
+  (defun hhsaez/apply-compilation-popup-rule (&optional side)
+    "Apply the compilation popup rule using SIDE or `hhsaez/compilation-popup-side'."
+    (let ((side (or side hhsaez/compilation-popup-side)))
+      (set-popup-rule! "^\\*compilation\\*"
+        :side side
+        :size 0.25)))
+
+  (defun hhsaez/toggle-compilation-popup-side ()
+    "Toggle the compilation popup between the bottom and the left."
+    (interactive)
+    (setq hhsaez/compilation-popup-side
+          (if (eq hhsaez/compilation-popup-side 'bottom)
+              'left
+            'bottom))
+    (hhsaez/apply-compilation-popup-rule)
+    (let ((buf (get-buffer "*compilation*")))
+      (when buf
+        (display-buffer buf)))
+    (message "Compilation popup side: %s" hhsaez/compilation-popup-side))
+
+  (hhsaez/apply-compilation-popup-rule)
 
   (defun my/next-error-prioritize-errors (orig-fn &rest args)
     "Prefer diagnostics with severity ≥ error when cycling with `next-error'."
