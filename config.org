@@ -386,7 +386,25 @@ Keep compilation buffers (including projectile builds) scrolled to the newest ou
            (apply orig-fn args))))))
 
   (unless (advice-member-p #'my/next-error-prioritize-errors 'next-error)
-    (advice-add 'next-error :around #'my/next-error-prioritize-errors)))
+    (advice-add 'next-error :around #'my/next-error-prioritize-errors))
+
+  (defun hhsaez/compilation-reuse-visible-window (orig-fn msg mk &optional other-window)
+    "Show compile errors in a visible buffer/window when one already exists."
+    (let* ((target (marker-buffer mk))
+           (reuse-window (and target (get-buffer-window target 0))))
+      (cond
+       (reuse-window
+        (select-window reuse-window)
+        (funcall orig-fn msg mk nil))
+       ((and (derived-mode-p 'compilation-mode)
+             (not other-window)
+             (not (one-window-p t)))
+        (funcall orig-fn msg mk t))
+       (t
+        (funcall orig-fn msg mk other-window)))))
+
+  (unless (advice-member-p #'hhsaez/compilation-reuse-visible-window 'compilation-goto-locus)
+    (advice-add 'compilation-goto-locus :around #'hhsaez/compilation-reuse-visible-window)))
 #+END_SRC
 
 ** Projectile

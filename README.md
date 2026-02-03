@@ -22,30 +22,22 @@ winget install GNU.Emacs ripgrep.ripgrep sharkdp.fd Git.Git GitHub.cli
    - Windows 11: `git clone https://github.com/doomemacs/doomemacs $env:USERPROFILE\.emacs.d`
 2. Clone this config repo to the matching Doom directory (`~/.doom.d` on macOS, `%USERPROFILE%\.doom.d` on Windows).
 3. Run Doom’s installer (`~/.emacs.d/bin/doom install` on macOS, `~\.emacs.d\bin\doom install` in PowerShell).
-4. Whenever you change `packages.el`, run `doom sync`.
+4. Whenever you change `packages.el` or `config.org`, run `doom sync`.
+5. Restart Emacs after `doom sync` so the updated config loads.
 
 ## Post-install steps
 - Install the fonts used by the theme:
-  - JetBrains Mono (main code font)  
+  - JetBrains Mono (main code font)
     - macOS: `brew install --cask font-jetbrains-mono`
     - Windows 11: download from <https://www.jetbrains.com/lp/mono/> and double-click to install.
-  - Noto Sans Symbols (Org heading bullets)  
+  - Noto Sans Symbols (Org heading bullets)
     - macOS: `brew tap homebrew/cask-fonts && brew install --cask font-noto-sans-symbols-2`
     - Windows 11: download from <https://fonts.google.com/noto/specimen/Noto+Sans+Symbols> and install via Settings ▸ Personalization ▸ Fonts.
-- Restart Emacs or run `M-x doom/reload-font` after installing fonts.
+- Restart Emacs (or run `M-x doom/reload-font`) after installing fonts so Doom picks them up.
+- Ensure Python's `pip` command works (`pip3` or `python3 -m pip`). Opening a `CMakeLists.txt` buffer triggers Emacs to run `PIP_BREAK_SYSTEM_PACKAGES=1 pip install --user "pygls<2" "cmake-language-server==0.1.11"`. If the automatic install fails (e.g., due to the Homebrew “externally managed environment” guard), run `PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --user "pygls<2" "cmake-language-server==0.1.11"` manually (or install via `pipx`) and ensure your Python user `bin` directory (e.g., `~/Library/Python/<version>/bin`) is on your `PATH`.
 
 ## Optional integrations
 - **GitHub Copilot chat via gptel**: install GitHub CLI (`gh`), authenticate with `gh auth login --scopes \"copilot\"`, and ensure `gh` is on your `PATH`. Set `GITHUB_TOKEN` or rely on the CLI auth cache before launching Emacs.
 - **Org directory**: the config expects `~/org/`. Create it or adjust the path in `config.org`.
 - **Codex CLI**: install the `codex` binary and run `M-x hhsaez/codex-run` from any Projectile project to open an interactive Codex session in a proper terminal buffer (falls back to Emacs `term`, so it works even without vterm).
 - **Terminal Emacs on macOS**: configure your terminal to send Option/Alt as Meta (Terminal.app: Settings ▸ Profiles ▸ Keyboard ▸ “Use Option as Meta key”; iTerm2: Profiles ▸ Keys ▸ Left/Right Option Key = Esc+). Super is not available in `-nw` sessions; use Command as Meta in GUI sessions instead.
-
-## Post-install steps
-
-After running `doom sync`, make sure the following are in place:
-
-- Install the `Noto Sans Symbols` font so Org heading bullets render correctly.
-  - **macOS:** `brew tap homebrew/cask-fonts && brew install --cask font-noto-sans-symbols-2`
-  - **Windows 11:** download the OTF from <https://fonts.google.com/noto/specimen/Noto+Sans+Symbols> and install it via Settings ▸ Personalization ▸ Fonts.
-- Restart Emacs (or run `M-x doom/reload-font`) after installing the font so Doom picks it up.
-- Ensure Python's `pip` command works (`pip3` or `python3 -m pip`). Opening a `CMakeLists.txt` buffer triggers Emacs to run `PIP_BREAK_SYSTEM_PACKAGES=1 pip install --user "pygls<2" "cmake-language-server==0.1.11"`. If the automatic install fails (e.g., due to the Homebrew “externally managed environment” guard), run `PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --user "pygls<2" "cmake-language-server==0.1.11"` manually (or install via `pipx`) and ensure your Python user `bin` directory (e.g., `~/Library/Python/<version>/bin`) is on your `PATH`.
