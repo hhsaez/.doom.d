@@ -124,11 +124,49 @@ Restore the default macOS font zoom shortcuts now that Command behaves as Meta.
 (setq frame-resize-pixelwise t
       window-resize-pixelwise t)
 
+(defvar hhsaez/frame-state-file
+  (expand-file-name "frame-state.el" doom-cache-dir)
+  "File used to persist the last GUI frame size and position.")
+
+(defun hhsaez/save-frame-state ()
+  "Persist the current GUI frame size and position."
+  (when (display-graphic-p)
+    (let* ((frame (selected-frame))
+           (pos (frame-position frame))
+           (left (car pos))
+           (top (cdr pos))
+           (width (frame-pixel-width frame))
+           (height (frame-pixel-height frame)))
+      (when (and (numberp left) (numberp top)
+                 (numberp width) (numberp height))
+        (with-temp-file hhsaez/frame-state-file
+          (prin1 (list :left left :top top :width width :height height)
+                 (current-buffer)))))))
+
+(defun hhsaez/restore-frame-state (&optional frame)
+  "Restore FRAME size and position from `hhsaez/frame-state-file`."
+  (let ((frame (or frame (selected-frame))))
+    (when (and (display-graphic-p frame)
+               (file-exists-p hhsaez/frame-state-file))
+      (with-temp-buffer
+        (insert-file-contents hhsaez/frame-state-file)
+        (let* ((data (read (current-buffer)))
+               (left (plist-get data :left))
+               (top (plist-get data :top))
+               (width (plist-get data :width))
+               (height (plist-get data :height)))
+          (when (and (numberp left) (numberp top)
+                     (numberp width) (numberp height))
+            (set-frame-size frame width height t)
+            (set-frame-position frame left top)
+            t))))))
+
 (defun hhsaez/scale-and-center-frame (&optional frame)
   "Resize FRAME to 80%x90% of its monitor and center it. Works for new frames too."
   (let* ((frame (or frame (selected-frame))))
     (when (and (display-graphic-p frame)
-               (fboundp 'frame-monitor-attributes))
+               (fboundp 'frame-monitor-attributes)
+               (not (hhsaez/restore-frame-state frame)))
       (let* ((attrs (frame-monitor-attributes frame))
              (workarea (alist-get 'workarea attrs)))
         (when (and workarea (>= (length workarea) 4))
@@ -142,6 +180,7 @@ Restore the default macOS font zoom shortcuts now that Command behaves as Meta.
 
 (add-hook 'after-init-hook #'hhsaez/scale-and-center-frame t)
 (add-hook 'after-make-frame-functions #'hhsaez/scale-and-center-frame)
+(add-hook 'kill-emacs-hook #'hhsaez/save-frame-state)
 #+END_SRC
 
 * Fonts
