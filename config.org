@@ -213,7 +213,22 @@ available. You can either set `doom-theme' or manually load a theme with the
 `load-theme' function. This is the default:
 
 #+BEGIN_SRC emacs-lisp
-(setq doom-theme 'doom-one)
+(setq hhsaez/theme-dark 'doom-one
+      hhsaez/theme-light 'doom-one-light
+      doom-theme hhsaez/theme-dark)
+
+(defun hhsaez/toggle-theme ()
+  "Toggle between the configured dark and light themes."
+  (interactive)
+  (setq doom-theme
+        (if (eq doom-theme hhsaez/theme-dark)
+            hhsaez/theme-light
+          hhsaez/theme-dark))
+  (mapc #'disable-theme custom-enabled-themes)
+  (load-theme doom-theme t))
+
+(map! :leader
+      :desc "Toggle theme" "t T" #'hhsaez/toggle-theme)
 #+END_SRC
 
 * Dashboard
