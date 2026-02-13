@@ -44,14 +44,14 @@ Disable empty line markers
 (remove-hook 'prog-mode-hook #'vi-tilde-fringe-mode)
 #+END_SRC
 
-Use the Command key as Meta on macOS while leaving Option for accented characters.
+Use Option (Alt) as Meta on macOS and keep Command as Super.
 
 #+BEGIN_SRC emacs-lisp
 (when (eq system-type 'darwin)
-  (setq mac-command-modifier 'meta
-        mac-option-modifier 'none
-        ns-command-modifier 'meta
-        ns-option-modifier 'none))
+  (setq mac-command-modifier 'super
+        mac-option-modifier 'meta
+        ns-command-modifier 'super
+        ns-option-modifier 'meta))
 #+END_SRC
 
 Revert buffers when the underlying file has changed.
@@ -81,15 +81,15 @@ Skip the confirmation prompt when quitting with =C-x C-c= unless processes are s
 
 ** Mac OS X
 
-Restore the default macOS font zoom shortcuts now that Command behaves as Meta.
+Keep the default macOS font zoom shortcuts on Command now that Option is Meta.
 
 #+BEGIN_SRC emacs-lisp
 (when (eq system-type 'darwin)
-  (map! "M-=" #'doom/increase-font-size
-        "M-+" #'doom/increase-font-size
-        "M--" #'doom/decrease-font-size
-        "M-_" #'doom/decrease-font-size
-        "M-0" #'doom/reset-font-size))
+  (map! "s-=" #'doom/increase-font-size
+        "s-+" #'doom/increase-font-size
+        "s--" #'doom/decrease-font-size
+        "s-_" #'doom/decrease-font-size
+        "s-0" #'doom/reset-font-size))
 #+END_SRC
 
 ** Window WSL
