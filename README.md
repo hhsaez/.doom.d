@@ -35,6 +35,8 @@ winget install GNU.Emacs ripgrep.ripgrep sharkdp.fd Git.Git GitHub.cli
     - Windows 11: download from <https://fonts.google.com/noto/specimen/Noto+Sans+Symbols> and install via Settings ▸ Personalization ▸ Fonts.
 - Restart Emacs (or run `M-x doom/reload-font`) after installing fonts so Doom picks them up.
 - Ensure Python's `pip` command works (`pip3` or `python3 -m pip`). Opening a `CMakeLists.txt` buffer triggers Emacs to run `PIP_BREAK_SYSTEM_PACKAGES=1 pip install --user "pygls<2" "cmake-language-server==0.1.11"`. If the automatic install fails (e.g., due to the Homebrew “externally managed environment” guard), run `PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --user "pygls<2" "cmake-language-server==0.1.11"` manually (or install via `pipx`) and ensure your Python user `bin` directory (e.g., `~/Library/Python/<version>/bin`) is on your `PATH`.
+- For C++ formatting, install `clangd` and `clang-format` and keep them on your `PATH`. This config uses a built-in fallback indentation style for regular C++ buffers and Org source edit buffers (`C-c '`), but exact formatting still comes from `clangd`/`clang-format`, ideally with a project-local `.clang-format`.
+- Inline `#+begin_src cpp` blocks in Org are intentionally kept simple: they stay syntax-highlighted, but they do not try to mimic full C++ indentation in-place. Use `C-c '` on the block when you want the real C++ editing/formatting behavior.
 
 ## Optional integrations
 - **GitHub Copilot chat via gptel**: install GitHub CLI (`gh`), authenticate with `gh auth login --scopes \"copilot\"`, and ensure `gh` is on your `PATH`. Set `GITHUB_TOKEN` or rely on the CLI auth cache before launching Emacs.
