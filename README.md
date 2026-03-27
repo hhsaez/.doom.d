@@ -43,3 +43,14 @@ winget install GNU.Emacs ripgrep.ripgrep sharkdp.fd Git.Git GitHub.cli
 - **Org directory**: the config expects `~/org/`. Create it or adjust the path in `config.org`.
 - **Codex CLI**: install the `codex` binary and run `M-x hhsaez/codex-run` from any Projectile project to open an interactive Codex session in a proper terminal buffer (falls back to Emacs `term`, so it works even without vterm).
 - **Terminal Emacs on macOS**: configure your terminal to send Option/Alt as Meta (Terminal.app: Settings ▸ Profiles ▸ Keyboard ▸ “Use Option as Meta key”; iTerm2: Profiles ▸ Keys ▸ Left/Right Option Key = Esc+). Super is not available in `-nw` sessions, and this config uses Option/Alt as Meta in GUI sessions too.
+- **Hyprland (Omarchy)**: if you use Omarchy’s macOS-like keybindings, make sure `Ctrl+F` is excluded from remapping so Emacs still sees `C-f`. After editing Hyprland bindings, run `hyprctl reload` or restart your session.
+
+## Post-install steps
+
+After running `doom sync`, make sure the following are in place:
+
+- Install the `Noto Sans Symbols` font so Org heading bullets render correctly.
+  - **macOS:** `brew tap homebrew/cask-fonts && brew install --cask font-noto-sans-symbols-2`
+  - **Windows 11:** download the OTF from <https://fonts.google.com/noto/specimen/Noto+Sans+Symbols> and install it via Settings ▸ Personalization ▸ Fonts.
+- Restart Emacs (or run `M-x doom/reload-font`) after installing the font so Doom picks it up.
+- Ensure Python's `pip` command works (`pip3` or `python3 -m pip`). Opening a `CMakeLists.txt` buffer triggers Emacs to run `PIP_BREAK_SYSTEM_PACKAGES=1 pip install --user "pygls<2" "cmake-language-server==0.1.11"`. If the automatic install fails (e.g., due to the Homebrew “externally managed environment” guard), run `PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --user "pygls<2" "cmake-language-server==0.1.11"` manually (or install via `pipx`) and ensure your Python user `bin` directory (e.g., `~/Library/Python/<version>/bin`) is on your `PATH`.
