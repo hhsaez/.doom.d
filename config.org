@@ -287,28 +287,11 @@ The following allos code blocks within .org files to be formatted when using /C-
 
 #+BEGIN_SRC emacs-lisp
 
-;; Keep inline Org src blocks simple; use `C-c '` for real language indentation.
+;; Good Org src defaults (indent inside blocks with c++-mode rules)
 (after! org
-  (setq org-src-tab-acts-natively nil
-        org-src-preserve-indentation t
-        org-edit-src-content-indentation 0
-        org-adapt-indentation nil)
-
-  (defun hhsaez/org-inline-src-indent-setup ()
-    (setq-local indent-tabs-mode nil
-                tab-width 3))
-
-  (defun hhsaez/org-inline-src-tab-h ()
-    (when (and (derived-mode-p 'org-mode)
-               (org-in-src-block-p t)
-               (not (save-excursion
-                      (beginning-of-line)
-                      (looking-at-p "[[:space:]]*#\\+"))))
-      (insert "   ")
-      t))
-
-  (add-hook 'org-mode-hook #'hhsaez/org-inline-src-indent-setup)
-  (add-hook 'org-tab-first-hook #'hhsaez/org-inline-src-tab-h)
+  (setq org-src-tab-acts-natively t
+        org-src-preserve-indentation nil
+        org-edit-src-content-indentation 0)
 
   (setq org-src-window-setup 'other-window)
 
@@ -325,7 +308,7 @@ The following allos code blocks within .org files to be formatted when using /C-
 
 ;; Make org-src C++ edit buffers format like .cpp, without clang-format
 (after! org-src
-  (defun hhsaez/org-src-cpp-lsp-format-setup ()
+  (defun my/org-src-cpp-lsp-format-setup ()
     (when (and (bound-and-true-p org-src-mode)
                (derived-mode-p 'c++-mode))
       ;; give buffer a plausible filename/dir so clangd attaches (you already did this)
@@ -337,10 +320,10 @@ The following allos code blocks within .org files to be formatted when using /C-
       (when (fboundp 'lsp-deferred) (lsp-deferred))
 
       ;; 1) Format on save (optional)
-      (add-hook 'before-save-hook #'hhsaez/lsp-format-buffer-if-ready nil t)
+      (add-hook 'before-save-hook #'lsp-format-buffer nil t)
 
       ;; 2) Use TAB to format (instead of cc-mode indent) in the edit buffer
-      (local-set-key (kbd "TAB") #'hhsaez/lsp-format-or-indent)
+      (local-set-key (kbd "TAB") #'lsp-format-buffer)
 
       ;; If you still want cc-mode indent on Shift+TAB:
       (local-set-key (kbd "<backtab>") #'indent-for-tab-command)
@@ -349,7 +332,7 @@ The following allos code blocks within .org files to be formatted when using /C-
       ;; (setq-local lsp-enable-on-type-formatting t)
       ;; Note: may be limited or interfered by electric-indent-mode.
       ))
-  (add-hook 'org-src-mode-hook #'hhsaez/org-src-cpp-lsp-format-setup))
+  (add-hook 'org-src-mode-hook #'my/org-src-cpp-lsp-format-setup))
 #+END_SRC
 
 Ensure regular C++ buffers behave the same way: run clangd on save and when pressing TAB.
@@ -357,49 +340,17 @@ Ensure regular C++ buffers behave the same way: run clangd on save and when pres
 #+BEGIN_SRC emacs-lisp
 ;; Keep C++ buffers in sync with clang-format defaults (indent, save hooks, TAB formatting).
 (after! cc-mode
-  (defconst hhsaez/c++-fallback-style
-    '("stroustrup"
-      (c-basic-offset . 3)
-      (c-comment-only-line-offset . 0)
-      (indent-tabs-mode . nil)
-      (tab-width . 8)
-      (c-offsets-alist
-       (access-label . -3)
-       (case-label . +)
-       (label . +)
-       (innamespace . +)
-       (inline-open . 0)
-       (block-open . 0)
-       (substatement-open . 0)
-       (brace-list-open . 0)
-       (brace-list-intro . +)
-       (brace-list-entry . 0)
-       (statement-case-open . 0)
-       (statement-cont . +)
-       (arglist-intro . +)
-       (arglist-cont . 0)
-       (arglist-cont-nonempty . c-lineup-arglist)
-       (topmost-intro-cont . +)
-       (template-args-cont . +)))
-    "Fallback C++ indentation style that approximates the preferred ClangFormat.")
-
-  (c-add-style "hhsaez-clang-format" hhsaez/c++-fallback-style)
-
-  (defun hhsaez/lsp-formatting-available-p ()
-    (and (bound-and-true-p lsp-mode)
-         (fboundp 'lsp-format-buffer)
-         (or (not buffer-file-name)
-             (file-exists-p buffer-file-name))))
-
   ;; Only format when LSP is initialized; otherwise saving a new buffer errors out.
   (defun hhsaez/lsp-format-buffer-if-ready ()
-    (when (hhsaez/lsp-formatting-available-p)
+    (when (and (bound-and-true-p lsp-mode)
+               (fboundp 'lsp-format-buffer))
       (lsp-format-buffer)))
 
   ;; Prefer LSP formatting for TAB, but gracefully fall back to cc-mode indent.
   (defun hhsaez/lsp-format-or-indent ()
     (interactive)
-    (if (hhsaez/lsp-formatting-available-p)
+    (if (and (bound-and-true-p lsp-mode)
+             (fboundp 'lsp-format-buffer))
         (lsp-format-buffer)
       (indent-for-tab-command)))
 
@@ -426,26 +377,16 @@ Ensure regular C++ buffers behave the same way: run clangd on save and when pres
           (string-to-number (match-string 1))))))
 
   ;; Apply clang-format's indent width so typing matches formatter output.
-  (defun hhsaez/c++-apply-fallback-style ()
-    (setq-local indent-tabs-mode nil
-                tab-width 8)
-    (when (derived-mode-p 'c++-mode)
-      (c-set-style "hhsaez-clang-format")
-      (setq-local c-basic-offset 3))
-    (when (boundp 'c-ts-mode-indent-offset)
-      (setq-local c-ts-mode-indent-offset 3)))
-
-  ;; Pull `.clang-format` width overrides into the local indentation settings.
-  (defun hhsaez/c++-apply-clang-format-overrides ()
+  (defun hhsaez/c++-apply-indent-width ()
     (when-let ((indent (hhsaez/clang-format-extract-number "IndentWidth")))
-      (setq-local c-basic-offset indent)
+      (setq-local c-basic-offset indent
+                  tab-width indent)
       (when (boundp 'c-ts-mode-indent-offset)
         (setq-local c-ts-mode-indent-offset indent))))
 
   ;; Main entry point: set indentation, hook formatting on save, and bind keys.
   (defun hhsaez/c++-lsp-format-setup ()
-    (hhsaez/c++-apply-fallback-style)
-    (hhsaez/c++-apply-clang-format-overrides)
+    (hhsaez/c++-apply-indent-width)
     (add-hook 'before-save-hook #'hhsaez/lsp-format-buffer-if-ready nil t)
     (local-set-key (kbd "TAB") #'hhsaez/lsp-format-or-indent)
     (local-set-key (kbd "<backtab>") #'indent-for-tab-command))
