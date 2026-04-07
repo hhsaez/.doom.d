@@ -397,7 +397,8 @@ and LSP formatting on save when available.
   (defun hhsaez/c++-apply-native-style ()
     (setq-local c-basic-offset 3
                 tab-width 8
-                indent-tabs-mode nil)
+                indent-tabs-mode nil
+                c-tab-always-indent t)
     (c-set-style "hhsaez/c++-native"))
 
   ;; Main entry point: set native indentation, hook formatting on save,
