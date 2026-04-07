@@ -328,6 +328,10 @@ makes /C-c '/ open the edit buffer to the side.
   (defun hhsaez/org-src-c++-setup ()
     (when (and (bound-and-true-p org-src-mode)
                (derived-mode-p 'c++-mode 'c++-ts-mode))
+      ;; Force classic cc-mode so native indentation follows our custom style.
+      (when (derived-mode-p 'c++-ts-mode)
+        (c++-mode))
+
       ;; give buffer a plausible filename/dir so clangd attaches (you already did this)
       (unless buffer-file-name
         (setq-local buffer-file-name
@@ -351,25 +355,50 @@ and LSP formatting on save when available.
 ;; Keep C++ editing fast and predictable: native indentation while editing,
 ;; and LSP formatting on save when available.
 (after! cc-mode
+  ;; Tree-sitter C++ mode uses a different indentation engine, so keep classic
+  ;; cc-mode as the default when native indentation fidelity matters.
+  (setq major-mode-remap-alist
+        (assq-delete-all 'c++-mode major-mode-remap-alist))
+
+  (c-add-style
+   "hhsaez/c++-native"
+   '("gnu"
+     (c-basic-offset . 3)
+     (tab-width . 8)
+     (indent-tabs-mode . nil)
+     (c-offsets-alist
+      . ((access-label . -3)
+         (case-label . +)
+         (label . +)
+         (innamespace . +)
+         (arglist-intro . +)
+         (arglist-cont . 0)
+         (arglist-cont-nonempty . +)
+         (arglist-close . 0)
+         (member-init-intro . +)
+         (member-init-cont . 0)
+         (inher-intro . +)
+         (inher-cont . 0)
+         (brace-list-intro . +)
+         (brace-list-entry . 0)
+         (brace-list-close . 0)
+         (statement-block-intro . +)
+         (substatement-open . 0)
+         (topmost-intro-cont . +)
+         (statement-cont . +)))))
+
   ;; Only format when LSP is initialized; otherwise saving a new buffer errors out.
   (defun hhsaez/lsp-format-buffer-if-ready ()
     (when (and (bound-and-true-p lsp-mode)
                (fboundp 'lsp-format-buffer))
       (lsp-format-buffer)))
 
-  ;; Approximate the preferred clang-format style with native cc-mode settings.
+  ;; Approximate the project's clang-format indentation with native cc-mode only.
   (defun hhsaez/c++-apply-native-style ()
     (setq-local c-basic-offset 3
                 tab-width 8
                 indent-tabs-mode nil)
-    (when (boundp 'c-ts-mode-indent-offset)
-      (setq-local c-ts-mode-indent-offset 3))
-    (c-set-offset 'access-label -3)
-    (c-set-offset 'case-label '+)
-    (c-set-offset 'label '+)
-    (c-set-offset 'innamespace '+)
-    (c-set-offset 'arglist-cont-nonempty '+)
-    (c-set-offset 'statement-cont '+))
+    (c-set-style "hhsaez/c++-native"))
 
   ;; Main entry point: set native indentation, hook formatting on save,
   ;; and keep TAB on the native indentation path.
@@ -379,8 +408,7 @@ and LSP formatting on save when available.
     (local-set-key (kbd "TAB") #'indent-for-tab-command)
     (local-set-key (kbd "<backtab>") #'indent-for-tab-command))
 
-  (dolist (hook '(c++-mode-hook c++-ts-mode-hook))
-    (add-hook hook #'hhsaez/c++-setup)))
+  (add-hook 'c++-mode-hook #'hhsaez/c++-setup))
 #+END_SRC
 
 ** Compilation

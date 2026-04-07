@@ -65,3 +65,9 @@ After running `doom sync`, make sure the following are in place:
 ### clangd is crashing with segmentation fault
 Symptom: The crash occurs during preamble build and AST serialization involving concept/template-heavy code.
 Likely fix: upgrade =clangd= to a newer release, ideally =17+=
+
+## C++ formatting
+
+Native Emacs C++ indentation in `config.org` is tuned to approximate the project's `.clang-format`, mainly for indentation-sensitive constructs such as access modifiers, namespace contents, argument lists, inheritance lists, and constructor initializer lists.
+
+Exact `.clang-format` parity is not expected from native indentation alone. Spacing rules, brace placement, line wrapping, include sorting, and comment formatting still require `clang-format` or `clangd` formatting support.
