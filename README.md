@@ -5,6 +5,7 @@ Custom DOOM Emacs config
 - Git, `ripgrep`, and `fd` available in `$PATH`
 - Python 3 with `pip`/`pip3` so Emacs can fetch the `cmake-language-server`
 - Optional but recommended: GitHub CLI (`gh`) for the Copilot GPT backend
+- =clang= or a package that provides =clangd=
 
 macOS (Homebrew):
 ```bash
@@ -14,6 +15,12 @@ brew install emacs ripgrep fd git gh
 Windows 11 (winget):
 ```powershell
 winget install GNU.Emacs ripgrep.ripgrep sharkdp.fd Git.Git GitHub.cli
+```
+
+Linux/Omarchy:
+
+``` bash
+sudo pacman -S emacs git ripgrep fd pythin pythin-pip clang
 ```
 
 ## Install Doom Emacs
@@ -52,3 +59,9 @@ After running `doom sync`, make sure the following are in place:
   - **Windows 11:** download the OTF from <https://fonts.google.com/noto/specimen/Noto+Sans+Symbols> and install it via Settings ▸ Personalization ▸ Fonts.
 - Restart Emacs (or run `M-x doom/reload-font`) after installing the font so Doom picks it up.
 - Ensure Python's `pip` command works (`pip3` or `python3 -m pip`). Opening a `CMakeLists.txt` buffer triggers Emacs to run `PIP_BREAK_SYSTEM_PACKAGES=1 pip install --user "pygls<2" "cmake-language-server==0.1.11"`. If the automatic install fails (e.g., due to the Homebrew “externally managed environment” guard), run `PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --user "pygls<2" "cmake-language-server==0.1.11"` manually (or install via `pipx`) and ensure your Python user `bin` directory (e.g., `~/Library/Python/<version>/bin`) is on your `PATH`.
+
+## Troubleshooting
+
+### clangd is crashing with segmentation fault
+Symptom: The crash occurs during preamble build and AST serialization involving concept/template-heavy code.
+Likely fix: upgrade =clangd= to a newer release, ideally =17+=

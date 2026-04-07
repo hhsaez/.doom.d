@@ -8,6 +8,7 @@
 - [[#os-specific][OS Specific]]
   - [[#mac-os-x][Mac OS X]]
   - [[#window-wsl][Window WSL]]
+  - [[#linuxomarchy][Linux/Omarchy]]
 - [[#frame-setup][Frame Setup]]
 - [[#fonts][Fonts]]
 - [[#theme][Theme]]
@@ -16,6 +17,8 @@
 - [[#development][Development]]
   - [[#compilation][Compilation]]
   - [[#projectile][Projectile]]
+  - [[#codex-cli][Codex CLI]]
+  - [[#cmake][CMake]]
   - [[#treemacs][Treemacs]]
   - [[#tree-sitter-grammars][Tree-sitter grammars]]
 - [[#gpt-el][GPT-EL]]
@@ -117,6 +120,18 @@ Keep the default macOS font zoom shortcuts on Command now that Option is Meta.
     (let* ((frame (selected-frame))
            (current (frame-parameter frame 'undecorated)))
       (set-frame-parameter frame 'undecorated (not current))))
+#+END_SRC
+
+** Linux/Omarchy
+
+Make Doom Emacs prefer the system clangd on Linux/Omarchy.
+The executable override must be conditional and apply to GNU/Linux only. It also needs to verify if =/usr/bin/clangd= exists and is executable.
+
+#+BEGIN_SRC emacs-lisp
+(after! lsp-mode
+  (when (and (eq system-type 'gnu/linux)
+             (file-executable-p "/usr/bin/clangd"))
+    (setq lsp-clients-clangd-executable "/usr/bin/clangd")))
 #+END_SRC
 
 * Frame Setup
