@@ -73,11 +73,44 @@ Instead, map the ESC key to keyboard-escape-quit (C-g) instead
 
 In addition, this seems to make the minibuffer to exit with just one ESC key press (instead of ESC ESC ESC by default)
 
+Restore popup cycling on =C-x p=. Newer Emacs versions use that prefix for project commands, so bind it again after startup to keep Doom's popup behavior.
+
+#+BEGIN_SRC emacs-lisp
+(after! popup
+  (map! "C-x p" #'+popup/other))
+#+END_SRC
+
 Skip the confirmation prompt when quitting with =C-x C-c= unless processes are still running (keep that warning).
 
 #+BEGIN_SRC emacs-lisp
 (setq confirm-kill-emacs nil
       confirm-kill-processes t)
+#+END_SRC
+
+Make automatic completion less eager while coding. Doom's Corfu defaults pop up
+after two characters; use three instead, and do not auto-popup after C++ access
+labels such as =public:=.
+
+#+BEGIN_SRC emacs-lisp
+(defun hhsaez/c++-access-label-colon-p ()
+  "Return non-nil when point is after a C++ access-label colon."
+  (and (derived-mode-p 'c++-mode 'c++-ts-mode)
+       (looking-back "^[[:space:]]*\\(public\\|private\\|protected\\):[[:space:]]*"
+                     (line-beginning-position))))
+
+(after! corfu-auto
+  (setq corfu-auto-prefix 3)
+
+  (defun hhsaez/corfu-auto-complete-unless-c++-access-label (fn &rest args)
+    "Prevent delayed Corfu completion after C++ access labels."
+    (unless (hhsaez/c++-access-label-colon-p)
+      (apply fn args)))
+
+  (advice-add #'corfu-auto--complete-deferred
+              :around #'hhsaez/corfu-auto-complete-unless-c++-access-label)
+
+  (add-to-list '+corfu-inhibit-auto-functions
+               #'hhsaez/c++-access-label-colon-p))
 #+END_SRC
 
 * OS Specific
@@ -401,11 +434,19 @@ and LSP formatting on save when available.
                 c-tab-always-indent t)
     (c-set-style "hhsaez/c++-native"))
 
+  (defun hhsaez/c++-quit-corfu-after-access-label ()
+    "Dismiss Corfu after typing a C++ access-label colon."
+    (when (and (fboundp 'corfu-quit)
+               (hhsaez/c++-access-label-colon-p))
+      (corfu-quit)))
+
   ;; Main entry point: set native indentation, hook formatting on save,
   ;; and keep TAB on the native indentation path.
   (defun hhsaez/c++-setup ()
     (hhsaez/c++-apply-native-style)
     (add-hook 'before-save-hook #'hhsaez/lsp-format-buffer-if-ready nil t)
+    (add-hook 'post-self-insert-hook
+              #'hhsaez/c++-quit-corfu-after-access-label nil t)
     (local-set-key (kbd "TAB") #'indent-for-tab-command)
     (local-set-key (kbd "<backtab>") #'indent-for-tab-command))
 
