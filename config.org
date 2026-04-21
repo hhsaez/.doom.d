@@ -87,6 +87,31 @@ Skip the confirmation prompt when quitting with =C-x C-c= unless processes are s
       confirm-kill-processes t)
 #+END_SRC
 
+Keep TAB focused on indentation in programming buffers. Doom's default Corfu
+binding makes TAB a DWIM completion key in some contexts; this restores the
+classic editing behavior for code while leaving text modes alone.
+
+#+BEGIN_SRC emacs-lisp
+(defun hhsaez/prog-tab-indents-line ()
+  "Make TAB indent the current line in programming buffers."
+  (setq-local tab-always-indent t)
+  (local-set-key (kbd "TAB") #'indent-for-tab-command)
+  (local-set-key (kbd "<tab>") #'indent-for-tab-command))
+
+(defun hhsaez/corfu-tab-indent-or-next ()
+  "Indent in programming buffers; otherwise keep Corfu's TAB navigation."
+  (interactive)
+  (if (derived-mode-p 'prog-mode)
+      (indent-for-tab-command)
+    (corfu-next)))
+
+(add-hook 'prog-mode-hook #'hhsaez/prog-tab-indents-line)
+
+(after! corfu
+  (define-key corfu-map (kbd "TAB") #'hhsaez/corfu-tab-indent-or-next)
+  (define-key corfu-map [tab] #'hhsaez/corfu-tab-indent-or-next))
+#+END_SRC
+
 Make automatic completion less eager while coding. Doom's Corfu defaults pop up
 after two characters; use three instead, and do not auto-popup after C++ access
 labels such as =public:=.
@@ -448,6 +473,7 @@ and LSP formatting on save when available.
     (add-hook 'post-self-insert-hook
               #'hhsaez/c++-quit-corfu-after-access-label nil t)
     (local-set-key (kbd "TAB") #'indent-for-tab-command)
+    (local-set-key (kbd "<tab>") #'indent-for-tab-command)
     (local-set-key (kbd "<backtab>") #'indent-for-tab-command))
 
   (add-hook 'c++-mode-hook #'hhsaez/c++-setup))
