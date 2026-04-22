@@ -306,8 +306,48 @@ available. You can either set `doom-theme' or manually load a theme with the
 
 * Dashboard
 
+Setup a custom banner for both terminal and GUI modes.
+
 #+BEGIN_SRC emacs-lisp
-(setq +doom-dashboard-banner-file (concat doom-user-dir "wallpaper.png"))
+(defun hhsaez/doom-dashboard-banner-from-file ()
+  (let* ((banner-file (expand-file-name "banner.txt" doom-user-dir))
+         (banner (with-temp-buffer
+                   (insert-file-contents banner-file)
+                   (split-string (buffer-string) "\n" t)))
+         (longest-line (apply #'max (mapcar #'string-width banner)))
+         (start (point)))
+    (dolist (line banner)
+      (insert
+       (+doom-dashboard--center
+        +doom-dashboard--width
+        (concat line
+                (make-string (max 0 (- longest-line (string-width line))) ?\s))))
+      (insert "\n"))
+    (add-text-properties start (point) '(face doom-dashboard-banner))))
+
+(defun my/doom-dashboard-banner-from-file ()
+  (let* ((banner-file (expand-file-name "banner.txt" doom-user-dir))
+         (banner (with-temp-buffer
+                   (insert-file-contents banner-file)
+                   (split-string (buffer-string) "\n" t)))
+         (longest-line (apply #'max (mapcar #'string-width banner)))
+         (start (point))
+         (dashboard-width +doom-dashboard--width)
+         (offset -18)) ;; tweak this value
+    (dolist (line banner)
+      (let* ((padding (+ (max 0 (/ (- dashboard-width longest-line) 2))
+                         offset)))
+        (insert (make-string (max 0 padding) ?\s))
+        (insert line)
+        (insert "\n")))
+    (add-text-properties start (point) '(face doom-dashboard-banner))))
+
+(setq +doom-dashboard-banner-padding '(2 . 2))
+(setq +doom-dashboard-ascii-banner-fn #'my/doom-dashboard-banner-from-file)
+
+(if (display-graphic-p)
+    (setq fancy-splash-image (expand-file-name "wallpaper.png" doom-user-dir))
+  (setq fancy-splash-image nil))
 #+END_SRC
 
 * Misc
