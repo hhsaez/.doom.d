@@ -585,6 +585,14 @@ Keep compilation buffers (including projectile builds) scrolled to the newest ou
     (advice-add 'compilation-goto-locus :around #'hhsaez/compilation-reuse-visible-window)))
 #+END_SRC
 
+Ensures Emacs’ default next-error selection order: latest compilation buffer first, current Flymake-capable buffer only as fallback
+(overrides DOOM Emacs behavior to use the current source buffer)
+
+#+BEGIN_SRC emacs-lisp
+(after! flymake
+  (setq-default next-error-find-buffer-function #'ignore))
+#+END_SRC
+
 ** Projectile
 Treat git submodules as part of the parent project instead of switching roots. The helper below asks git for the superproject directory; if we are inside a submodule it returns the top-level checkout so projectile keeps that as the active project. When no superproject exists the fallback still lets projectile use its usual detection.
 
