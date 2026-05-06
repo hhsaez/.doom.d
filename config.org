@@ -421,7 +421,7 @@ makes /C-c '/ open the edit buffer to the side.
                '("^\\*Org Src" hhsaez/org-src-display-buffer)))
 
 ;; Make C++ org-src edit buffers behave like regular C++ buffers:
-;; native indentation while editing, LSP formatting on save when available.
+;; native indentation while editing, with LSP ready for Doom formatting.
 (after! org-src
   (defun hhsaez/org-src-c++-setup ()
     (when (and (bound-and-true-p org-src-mode)
@@ -439,19 +439,17 @@ makes /C-c '/ open the edit buffer to the side.
       (when (fboundp 'lsp-deferred) (lsp-deferred))
 
       (hhsaez/c++-apply-native-style)
-      (add-hook 'before-save-hook #'hhsaez/lsp-format-buffer-if-ready nil t)
       (local-set-key (kbd "TAB") #'indent-for-tab-command)
       (local-set-key (kbd "<backtab>") #'indent-for-tab-command)
       ))
   (add-hook 'org-src-mode-hook #'hhsaez/org-src-c++-setup))
 #+END_SRC
 
-Ensure regular C++ buffers behave the same way: native indentation while editing,
-and LSP formatting on save when available.
+Ensure regular C++ buffers use native indentation while editing. Save-time
+formatting is handled by Doom's =format +onsave +lsp= module.
 
 #+BEGIN_SRC emacs-lisp
-;; Keep C++ editing fast and predictable: native indentation while editing,
-;; and LSP formatting on save when available.
+;; Keep C++ editing fast and predictable: native indentation while editing.
 (after! cc-mode
   ;; Tree-sitter C++ mode uses a different indentation engine, so keep classic
   ;; cc-mode as the default when native indentation fidelity matters.
@@ -485,12 +483,6 @@ and LSP formatting on save when available.
          (topmost-intro-cont . +)
          (statement-cont . +)))))
 
-  ;; Only format when LSP is initialized; otherwise saving a new buffer errors out.
-  (defun hhsaez/lsp-format-buffer-if-ready ()
-    (when (and (bound-and-true-p lsp-mode)
-               (fboundp 'lsp-format-buffer))
-      (lsp-format-buffer)))
-
   ;; Approximate the project's clang-format indentation with native cc-mode only.
   (defun hhsaez/c++-apply-native-style ()
     (setq-local c-basic-offset 3
@@ -505,11 +497,9 @@ and LSP formatting on save when available.
                (hhsaez/c++-access-label-colon-p))
       (corfu-quit)))
 
-  ;; Main entry point: set native indentation, hook formatting on save,
-  ;; and keep TAB on the native indentation path.
+  ;; Main entry point: set native indentation and keep TAB on that path.
   (defun hhsaez/c++-setup ()
     (hhsaez/c++-apply-native-style)
-    (add-hook 'before-save-hook #'hhsaez/lsp-format-buffer-if-ready nil t)
     (add-hook 'post-self-insert-hook
               #'hhsaez/c++-quit-corfu-after-access-label nil t)
     (local-set-key (kbd "TAB") #'indent-for-tab-command)
