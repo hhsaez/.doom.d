@@ -500,36 +500,11 @@ formatting is handled by Doom's =format +onsave +lsp= module.
 #+END_SRC
 
 ** Compilation
-Keep compilation buffers (including projectile builds) scrolled to the newest output. Show them at the bottom by default, with a toggle to move them to the left when needed.
+Keep compilation buffers (including projectile builds) scrolled to the newest output.
 
 #+BEGIN_SRC emacs-lisp
 (after! compile
   (setq compilation-scroll-output t)
-
-  (defvar hhsaez/compilation-popup-side 'bottom
-    "Preferred side for displaying compilation popups.")
-
-  (defun hhsaez/apply-compilation-popup-rule (&optional side)
-    "Apply the compilation popup rule using SIDE or `hhsaez/compilation-popup-side'."
-    (let ((side (or side hhsaez/compilation-popup-side)))
-      (set-popup-rule! "^\\*compilation\\*"
-        :side side
-        :size 0.25)))
-
-  (defun hhsaez/toggle-compilation-popup-side ()
-    "Toggle the compilation popup between the bottom and the left."
-    (interactive)
-    (setq hhsaez/compilation-popup-side
-          (if (eq hhsaez/compilation-popup-side 'bottom)
-              'left
-            'bottom))
-    (hhsaez/apply-compilation-popup-rule)
-    (let ((buf (get-buffer "*compilation*")))
-      (when buf
-        (display-buffer buf)))
-    (message "Compilation popup side: %s" hhsaez/compilation-popup-side))
-
-  (hhsaez/apply-compilation-popup-rule)
 
   (defun my/next-error-prioritize-errors (orig-fn &rest args)
     "Prefer diagnostics with severity ≥ error when cycling with `next-error'."
