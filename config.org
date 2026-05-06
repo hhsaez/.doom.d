@@ -37,16 +37,6 @@ Some functionality uses this to identify you, e.g. GPG configuration, email clie
 
 * Editor
 
-Disable empty line markers
-
-#+BEGIN_SRC emacs-lisp
-(setq-default indicate-empty-lines nil)
-
-(after! vi-tilde-fringe
-  (global-vi-tilde-fringe-mode -1))
-(remove-hook 'prog-mode-hook #'vi-tilde-fringe-mode)
-#+END_SRC
-
 Use Option (Alt) as Meta on macOS and keep Command as Super.
 
 #+BEGIN_SRC emacs-lisp

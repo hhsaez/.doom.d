@@ -20,7 +20,7 @@ winget install GNU.Emacs ripgrep.ripgrep sharkdp.fd Git.Git GitHub.cli
 Linux/Omarchy:
 
 ``` bash
-sudo pacman -S emacs git ripgrep fd pythin pythin-pip clang
+sudo pacman -S emacs git ripgrep fd python python-pip clang
 ```
 
 ## Install Doom Emacs
@@ -29,7 +29,7 @@ sudo pacman -S emacs git ripgrep fd pythin pythin-pip clang
    - Windows 11: `git clone https://github.com/doomemacs/doomemacs $env:USERPROFILE\.emacs.d`
 2. Clone this config repo to the matching Doom directory (`~/.doom.d` on macOS, `%USERPROFILE%\.doom.d` on Windows).
 3. Run Doom’s installer (`~/.emacs.d/bin/doom install` on macOS, `~\.emacs.d\bin\doom install` in PowerShell).
-4. Whenever you change `packages.el` or `config.org`, run `doom sync`.
+4. Whenever you change `init.el`, `packages.el`, or `config.org`, run `doom sync`.
 5. Restart Emacs after `doom sync` so the updated config loads.
 
 ## Post-install steps
