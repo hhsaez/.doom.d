@@ -710,17 +710,23 @@ Ensure the cmake language server can be installed even when the Python package m
 #+END_SRC
 
 ** Tree-sitter grammars
-Install missing C/C++ grammars automatically so tree-sitter works on fresh setups.
+Install missing grammars automatically so tree-sitter works on fresh setups.
 
 #+BEGIN_SRC emacs-lisp
 (after! treesit
   (require 'cl-lib)
-  (defvar hhsaez/treesit-auto-grammars '(c cpp)
+  (defvar hhsaez/treesit-auto-grammars '(c cpp css javascript json tsx typescript yaml)
     "Tree-sitter grammars that must be present locally.")
 
   (defvar hhsaez/treesit-language-sources
     '((c . ("https://github.com/tree-sitter/tree-sitter-c"))
-      (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp")))
+      (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+      (css . ("https://github.com/tree-sitter/tree-sitter-css"))
+      (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+      (json . ("https://github.com/tree-sitter/tree-sitter-json"))
+      (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "tsx/src"))
+      (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "typescript/src"))
+      (yaml . ("https://github.com/ikatyang/tree-sitter-yaml")))
     "Alist of LANG . SOURCE tuples to ensure before installing grammars.")
 
   ;; Guarantee treesit knows how to fetch our required grammars.
