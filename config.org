@@ -716,7 +716,7 @@ Ensure the cmake language server can be installed even when the Python package m
 
 #+BEGIN_SRC emacs-lisp
 (after! treemacs
-  (setq treemacs-is-never-other-window nil))
+  (setq treemacs-follow-mode t))
 #+END_SRC
 
 ** Tree-sitter grammars
