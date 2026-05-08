@@ -577,7 +577,10 @@ Run the Codex CLI from the current Projectile project without leaving Emacs.
 #+END_SRC
 
 ** CMake
-Ensure the cmake language server can be installed even when the Python package manager is only exposed as =pip3= or via =python -m pip=.
+Upstream =lsp-cmake= bootstraps =cmake-language-server= with plain =pip=.
+Replace that installer so macOS/Homebrew and pip3-only environments can install
+the server through =pip3= or =python -m pip=, and so Emacs can find Python's
+user-level =bin= directory afterward.
 
 #+BEGIN_SRC emacs-lisp
 (after! lsp-cmake
