@@ -643,9 +643,12 @@ Ensure the cmake language server can be installed even when the Python package m
 
 ** Treemacs
 
+Doom disables Treemacs follow mode by default because it can be distracting.
+Re-enable it so the Treemacs view tracks the current buffer.
+
 #+BEGIN_SRC emacs-lisp
 (after! treemacs
-  (setq treemacs-follow-mode t))
+  (treemacs-follow-mode 1))
 #+END_SRC
 
 * GPT-EL
