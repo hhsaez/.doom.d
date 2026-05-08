@@ -418,17 +418,14 @@ makes /C-c '/ open the edit buffer to the side.
   (add-hook 'org-src-mode-hook #'hhsaez/org-src-c++-setup))
 #+END_SRC
 
-Ensure regular C++ buffers use native indentation while editing. Save-time
-formatting is handled by Doom's =format +onsave +lsp= module.
+Classic =c++-mode= is preserved by the =(cc +lsp)= Doom module selection in
+=init.el=. The custom setup below keeps native indentation predictable while
+editing, keeps TAB on indentation, and dismisses Corfu after C++ access labels.
+Save-time formatting is handled by Doom's =format +onsave +lsp= module.
 
 #+BEGIN_SRC emacs-lisp
-;; Keep C++ editing fast and predictable: native indentation while editing.
+;; Keep C++ editing fast and predictable in classic c++-mode.
 (after! cc-mode
-  ;; Tree-sitter C++ mode uses a different indentation engine, so keep classic
-  ;; cc-mode as the default when native indentation fidelity matters.
-  (setq major-mode-remap-alist
-        (assq-delete-all 'c++-mode major-mode-remap-alist))
-
   (c-add-style
    "hhsaez/c++-native"
    '("gnu"
