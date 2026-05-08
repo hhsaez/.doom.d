@@ -20,7 +20,6 @@
   - [[#codex-cli][Codex CLI]]
   - [[#cmake][CMake]]
   - [[#treemacs][Treemacs]]
-  - [[#tree-sitter-grammars][Tree-sitter grammars]]
 - [[#gpt-el][GPT-EL]]
 
 * Introduction
@@ -305,22 +304,6 @@ Setup a custom banner for both terminal and GUI modes.
                    (insert-file-contents banner-file)
                    (split-string (buffer-string) "\n" t)))
          (longest-line (apply #'max (mapcar #'string-width banner)))
-         (start (point)))
-    (dolist (line banner)
-      (insert
-       (+doom-dashboard--center
-        +doom-dashboard--width
-        (concat line
-                (make-string (max 0 (- longest-line (string-width line))) ?\s))))
-      (insert "\n"))
-    (add-text-properties start (point) '(face doom-dashboard-banner))))
-
-(defun my/doom-dashboard-banner-from-file ()
-  (let* ((banner-file (expand-file-name "banner.txt" doom-user-dir))
-         (banner (with-temp-buffer
-                   (insert-file-contents banner-file)
-                   (split-string (buffer-string) "\n" t)))
-         (longest-line (apply #'max (mapcar #'string-width banner)))
          (start (point))
          (dashboard-width +doom-dashboard--width)
          (offset -18)) ;; tweak this value
@@ -333,7 +316,7 @@ Setup a custom banner for both terminal and GUI modes.
     (add-text-properties start (point) '(face doom-dashboard-banner))))
 
 (setq +doom-dashboard-banner-padding '(2 . 2))
-(setq +doom-dashboard-ascii-banner-fn #'my/doom-dashboard-banner-from-file)
+(setq +doom-dashboard-ascii-banner-fn #'hhsaez/doom-dashboard-banner-from-file)
 
 (if (display-graphic-p)
     (setq fancy-splash-image (expand-file-name "wallpaper.png" doom-user-dir))
@@ -506,7 +489,7 @@ Keep compilation buffers (including projectile builds) scrolled to the newest ou
 (after! compile
   (setq compilation-scroll-output t)
 
-  (defun my/next-error-prioritize-errors (orig-fn &rest args)
+  (defun hhsaez/next-error-prioritize-errors (orig-fn &rest args)
     "Prefer diagnostics with severity ≥ error when cycling with `next-error'."
     (let ((orig-threshold compilation-skip-threshold))
       (condition-case _err
@@ -518,8 +501,8 @@ Keep compilation buffers (including projectile builds) scrolled to the newest ou
          (let ((compilation-skip-threshold orig-threshold))
            (apply orig-fn args))))))
 
-  (unless (advice-member-p #'my/next-error-prioritize-errors 'next-error)
-    (advice-add 'next-error :around #'my/next-error-prioritize-errors))
+  (unless (advice-member-p #'hhsaez/next-error-prioritize-errors 'next-error)
+    (advice-add 'next-error :around #'hhsaez/next-error-prioritize-errors))
 
   (defun hhsaez/compilation-reuse-visible-window (orig-fn msg mk &optional other-window)
     "Show compile errors in a visible buffer/window when one already exists."
@@ -554,7 +537,7 @@ Treat git submodules as part of the parent project instead of switching roots. T
 #+BEGIN_SRC emacs-lisp
 (after! projectile
   (require 'subr-x)
-  (defun my/projectile-root-superproject (dir)
+  (defun hhsaez/projectile-root-superproject (dir)
     "Return the superproject root for DIR when inside a git submodule."
     (when dir
       (let ((default-directory dir))
@@ -576,7 +559,7 @@ Treat git submodules as part of the parent project instead of switching roots. T
                      (not (string-equal (directory-file-name resolved)
                                         (directory-file-name (expand-file-name dir)))))
             resolved)))))
-  (add-to-list 'projectile-project-root-functions #'my/projectile-root-superproject))
+  (add-to-list 'projectile-project-root-functions #'hhsaez/projectile-root-superproject))
 #+END_SRC
 
 ** Codex CLI
@@ -672,47 +655,6 @@ Ensure the cmake language server can be installed even when the Python package m
 #+BEGIN_SRC emacs-lisp
 (after! treemacs
   (setq treemacs-follow-mode t))
-#+END_SRC
-
-** Tree-sitter grammars
-Install missing grammars automatically so tree-sitter works on fresh setups.
-
-#+BEGIN_SRC emacs-lisp
-(after! treesit
-  (require 'cl-lib)
-  (defvar hhsaez/treesit-auto-grammars '(c cpp css javascript json tsx typescript yaml)
-    "Tree-sitter grammars that must be present locally.")
-
-  (defvar hhsaez/treesit-language-sources
-    '((c . ("https://github.com/tree-sitter/tree-sitter-c"))
-      (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
-      (css . ("https://github.com/tree-sitter/tree-sitter-css"))
-      (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
-      (json . ("https://github.com/tree-sitter/tree-sitter-json"))
-      (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "tsx/src"))
-      (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "typescript/src"))
-      (yaml . ("https://github.com/ikatyang/tree-sitter-yaml")))
-    "Alist of LANG . SOURCE tuples to ensure before installing grammars.")
-
-  ;; Guarantee treesit knows how to fetch our required grammars.
-  (dolist (entry hhsaez/treesit-language-sources)
-    (cl-pushnew entry treesit-language-source-alist
-                :test (lambda (a b) (eq (car a) (car b)))))
-
-  (defun hhsaez/ensure-treesit-grammars (&optional languages)
-    "Install any missing tree-sitter LANGUAGES without prompting."
-    (when (and (fboundp 'treesit-install-language-grammar)
-               (fboundp 'treesit-language-available-p))
-      (dolist (lang (or languages hhsaez/treesit-auto-grammars))
-        (unless (treesit-language-available-p lang)
-          (condition-case err
-              (progn
-                (message "Installing tree-sitter grammar for %s..." lang)
-                (treesit-install-language-grammar lang))
-            (error
-             (message "tree-sitter grammar install failed for %s: %s" lang err)))))))
-
-  (hhsaez/ensure-treesit-grammars))
 #+END_SRC
 
 * GPT-EL
