@@ -513,8 +513,9 @@ Keep compilation buffers (including projectile builds) scrolled to the newest ou
     (advice-add 'compilation-goto-locus :around #'hhsaez/compilation-reuse-visible-window)))
 #+END_SRC
 
-Ensures Emacs’ default next-error selection order: latest compilation buffer first, current Flymake-capable buffer only as fallback
-(overrides DOOM Emacs behavior to use the current source buffer)
+Doom's Flymake setup makes =next-error= consult the current buffer first. Restore
+Emacs' default buffer selection so the latest compilation buffer remains the
+primary source for =next-error=, with Flymake-capable buffers only as fallback.
 
 #+BEGIN_SRC emacs-lisp
 (after! flymake
