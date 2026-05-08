@@ -46,12 +46,6 @@ Use Option (Alt) as Meta on macOS and keep Command as Super.
         ns-option-modifier 'meta))
 #+END_SRC
 
-Revert buffers when the underlying file has changed.
-
-#+BEGIN_SRC emacs-lisp
-(global-auto-revert-mode 1)
-#+END_SRC
-
 By default Emacs will close all windows when pressing the ESC key. I hate that.
 
 Instead, map the ESC key to keyboard-escape-quit (C-g) instead
