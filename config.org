@@ -262,7 +262,7 @@ available. You can either set `doom-theme' or manually load a theme with the
 `load-theme' function. This is the default:
 
 #+BEGIN_SRC emacs-lisp
-(setq hhsaez/theme-dark 'doom-one
+(setq hhsaez/theme-dark 'doom-dracula
       hhsaez/theme-light 'doom-one-light
       doom-theme hhsaez/theme-dark)
 
