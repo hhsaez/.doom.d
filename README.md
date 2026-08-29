@@ -3,7 +3,7 @@ Custom DOOM Emacs config
 ## Requirements
 - Emacs 29.1+ (native Windows build or GNU Emacs on macOS)
 - Git, `ripgrep`, and `fd` available in `$PATH`
-- Python 3 with `pip`/`pip3` so Emacs can fetch the `cmake-language-server`
+- Python 3 with `pip`/`pip3` for the CMake language server (Python 3.13 is required on Linux; see the post-install steps)
 - Optional but recommended: GitHub CLI (`gh`) for the Copilot GPT backend
 - `clang` or a package that provides `clangd`
 
@@ -41,7 +41,21 @@ sudo pacman -S emacs git ripgrep fd python python-pip clang
     - macOS: `brew tap homebrew/cask-fonts && brew install --cask font-noto-sans-symbols-2`
     - Windows 11: download from <https://fonts.google.com/noto/specimen/Noto+Sans+Symbols> and install via Settings ▸ Personalization ▸ Fonts.
 - Restart Emacs (or run `M-x doom/reload-font`) after installing fonts so Doom picks them up.
-- Ensure Python's `pip` command works (`pip3` or `python3 -m pip`). Opening a `CMakeLists.txt` buffer triggers Emacs to run `PIP_BREAK_SYSTEM_PACKAGES=1 pip install --user "pygls<2" "cmake-language-server==0.1.11"`. If the automatic install fails (e.g., due to the Homebrew “externally managed environment” guard), run `PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --user "pygls<2" "cmake-language-server==0.1.11"` manually (or install via `pipx`) and ensure your Python user `bin` directory (e.g., `~/Library/Python/<version>/bin`) is on your `PATH`.
+- CMake language server (Linux/Omarchy): Python 3.14 is currently incompatible with `cmake-language-server` because its `pygls` 1.x dependency calls a removed `asyncio` API. Install Python 3.13 from the AUR, then isolate the server in a virtual environment and pin its compatible dependencies:
+
+  ```bash
+  yay -S python313
+  python3.13 -m venv ~/.local/venvs/cmake-lsp
+  ~/.local/venvs/cmake-lsp/bin/pip install --upgrade pip
+  ~/.local/venvs/cmake-lsp/bin/pip install --force-reinstall \
+    'cmake-language-server==0.1.11' \
+    'pygls==1.3.1'
+  mv ~/.local/bin/cmake-language-server ~/.local/bin/cmake-language-server.py314
+  ln -s ~/.local/venvs/cmake-lsp/bin/cmake-language-server ~/.local/bin/cmake-language-server
+  cmake-language-server --version
+  ```
+
+  The `pygls` pin is required: `cmake-language-server` 0.1.11 imports the pre-2.0 `pygls` API. Restart Emacs after the command succeeds. If you use `paru` rather than `yay`, substitute `paru -S python313`.
 - Doom may prompt to install missing tree-sitter grammars the first time you open a tree-sitter-enabled language buffer after `doom sync`. Accept the prompt when you want that language to use tree-sitter-backed modes.
 
 ## Optional integrations
