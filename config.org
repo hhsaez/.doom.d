@@ -642,9 +642,11 @@ user-level =bin= directory afterward.
 
 Doom disables Treemacs follow mode by default because it can be distracting.
 Re-enable it so the Treemacs view tracks the current buffer.
+Start with an unlocked width so the window can be resized by dragging its divider.
 
 #+BEGIN_SRC emacs-lisp
 (after! treemacs
+  (setq treemacs-width-is-initially-locked nil)
   (treemacs-follow-mode 1))
 #+END_SRC
 
